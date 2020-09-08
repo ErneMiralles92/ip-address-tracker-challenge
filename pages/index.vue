@@ -30,7 +30,7 @@
                     <span class="darkGrayColor--text it-font-weight-medium">Search for any IP address or domain</span>
                   </template>
                   <template v-slot:append>
-                    <v-btn :disabled="!validIp" color="veryDarkGrayColor" class="btn-append" height="56">
+                    <v-btn :disabled="!validIp" color="veryDarkGrayColor" class="btn-append" height="56" @click="fetchIpData(ipSearch)">
                       <v-img src="/images/icon-arrow.svg" height="12" contain />
                     </v-btn>
                   </template>
@@ -42,18 +42,18 @@
       </v-col>
     </v-toolbar>
     <v-row justify="center" class="px-4">
-      <v-col cols="12" md="8" class="cardFloating">
+      <v-col cols="12" md="11" lg="8" class="cardFloating">
         <v-hover>
           <template v-slot="{ hover }">
             <v-card class="ip-info-card" :elevation="hover ? 24 : 6">
-              <v-card-text class="py-0">
+              <v-card-text>
                 <v-row>
                   <v-col cols="12" md="3">
                     <v-row no-gutters justify="center" justify-md="start">
                       <span class="darkGrayColor--text it-font-weight-medium caption">IP ADDRESS</span>
                     </v-row>
                     <v-row no-gutters justify="center" justify-md="start">
-                      <span class="veryDarkGrayColor--text it-font-weight-medium title">192.2.34.56</span>
+                      <span class="veryDarkGrayColor--text it-font-weight-medium title  text-center text-md-left">{{ ipData.ip }}</span>
                     </v-row>
                   </v-col>
                   <v-divider v-if="$vuetify.breakpoint.mdAndUp" vertical class="ml-n1" />
@@ -62,7 +62,7 @@
                       <span class="darkGrayColor--text it-font-weight-medium caption">LOCATION</span>
                     </v-row>
                     <v-row no-gutters justify="center" justify-md="start">
-                      <span class="veryDarkGrayColor--text it-font-weight-medium title">Brooklyn, New York</span>
+                      <span class="veryDarkGrayColor--text it-font-weight-medium title  text-center text-md-left">{{ ipData.location }}</span>
                     </v-row>
                   </v-col>
                   <v-divider v-if="$vuetify.breakpoint.mdAndUp" vertical class="ml-n1" />
@@ -71,7 +71,7 @@
                       <span class="darkGrayColor--text it-font-weight-medium caption">TIMEZONE</span>
                     </v-row>
                     <v-row no-gutters justify="center" justify-md="start">
-                      <span class="veryDarkGrayColor--text it-font-weight-medium title">UTC-05:00</span>
+                      <span class="veryDarkGrayColor--text it-font-weight-medium title  text-center text-md-left">{{ ipData.timezone }}</span>
                     </v-row>
                   </v-col>
                   <v-divider v-if="$vuetify.breakpoint.mdAndUp" vertical class="ml-n1" />
@@ -80,7 +80,7 @@
                       <span class="darkGrayColor--text it-font-weight-medium caption">ISP</span>
                     </v-row>
                     <v-row no-gutters justify="center" justify-md="start">
-                      <span class="veryDarkGrayColor--text it-font-weight-medium title">Space X</span>
+                      <span class="veryDarkGrayColor--text it-font-weight-medium title text-center text-md-left">{{ ipData.isp }}</span>
                     </v-row>
                   </v-col>
                 </v-row>
@@ -92,9 +92,9 @@
     </v-row>
     <div id="map-wrap" :style="`height: ${ $vuetify.breakpoint.mdAndUp ? 'calc(100vh - 268px)' : '600px'}`">
       <client-only>
-        <l-map :zoom="13" :center="[55.9464418,8.1277591]" :options="{ zoomControl: false }">
+        <l-map :zoom="13" :center="[ipData.lat, ipData.lng]" :options="{ zoomControl: false }">
           <l-tile-layer url="http://{s}.tile.osm.org/{z}/{x}/{y}.png" />
-          <l-marker :lat-lng="[55.9464418,8.1277591]" :icon="markerIcon" />
+          <l-marker :lat-lng="[ipData.lat, ipData.lng]" :icon="markerIcon" />
         </l-map>
       </client-only>
     </div>
@@ -111,19 +111,45 @@ export default defineComponent({
       const entries = ipSearch.value.split('.')
       return entries.length === 4 && entries.filter(entry => entry !== '' && +entry >= 0 && +entry <= 255).length === 4
     })
-
     const markerIcon = ref({})
-    onMounted(() => {
+    const ipData = ref({
+      ip: '-',
+      location: '-',
+      timezone: '-',
+      isp: '-',
+      lat: 37.37,
+      lng: -122.04
+    })
+    const fetchIpData = async (ip: string = '') => {
+      try {
+        const data = await ctx.root.$axios.$get(`https://geo.ipify.org/api/v1?apiKey=at_WMcJT1XDyvOvVhRAATuwPtn4ZMJP7${ip !== '' ? `&ipAddress=${ip}` : ''}`)
+        // console.log({ data })
+        ipData.value = {
+          ip: data.ip,
+          location: `${data.location.city}, ${data.location.region}, ${data.location.country}`,
+          timezone: data.location.timezone,
+          lat: data.location.lat,
+          lng: data.location.lng,
+          isp: data.isp
+        }
+      } catch (error) {
+        console.log({ error })
+      }
+    }
+    onMounted(async () => {
       const L = ctx.root.$L
       markerIcon.value = L.icon({
         iconUrl: '/images/icon-location.svg',
         iconSize: [42, 56]
       })
+      await fetchIpData()
     })
     return {
       ipSearch,
       validIp,
-      markerIcon
+      markerIcon,
+      ipData,
+      fetchIpData
     }
   }
 })
