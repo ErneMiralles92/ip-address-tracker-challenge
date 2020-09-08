@@ -1,6 +1,12 @@
-declare module '*.vue' {
-    import Vue from 'vue'
+import Vue from 'vue'
+
+  declare module '*.vue' {
     export default Vue
   }
 
-declare module 'vue-the-mask'
+  /* This file simply imports the needed types from firebase and forwards them */
+  declare module 'vue/types/vue' {
+    interface Vue {
+      $L: any
+    }
+  }

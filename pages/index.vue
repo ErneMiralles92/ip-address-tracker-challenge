@@ -94,7 +94,7 @@
       <client-only>
         <l-map :zoom="13" :center="[55.9464418,8.1277591]" :options="{ zoomControl: false }">
           <l-tile-layer url="http://{s}.tile.osm.org/{z}/{x}/{y}.png" />
-          <l-marker :lat-lng="[55.9464418,8.1277591]" />
+          <l-marker :lat-lng="[55.9464418,8.1277591]" :icon="markerIcon" />
         </l-map>
       </client-only>
     </div>
@@ -102,18 +102,28 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, computed, watch, ref } from '@vue/composition-api'
+import { defineComponent, onMounted, computed, ref } from '@vue/composition-api'
 
 export default defineComponent({
-  setup () {
+  setup (_, ctx) {
     const ipSearch = ref('')
     const validIp = computed(() => {
       const entries = ipSearch.value.split('.')
       return entries.length === 4 && entries.filter(entry => entry !== '' && +entry >= 0 && +entry <= 255).length === 4
     })
+
+    const markerIcon = ref({})
+    onMounted(() => {
+      const L = ctx.root.$L
+      markerIcon.value = L.icon({
+        iconUrl: '/images/icon-location.svg',
+        iconSize: [42, 56]
+      })
+    })
     return {
       ipSearch,
-      validIp
+      validIp,
+      markerIcon
     }
   }
 })
