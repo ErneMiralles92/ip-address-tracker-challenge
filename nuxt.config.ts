@@ -17,7 +17,7 @@ export default {
   */
   head: {
     titleTemplate: '%s',
-    title: 'Frontend Mentor | IP Address Tracker',
+    title: 'IP Address Tracker | Frontend Mentor',
     meta: [
       { charset: 'utf-8' },
       { name: 'viewport', content: 'width=device-width, initial-scale=1' },
