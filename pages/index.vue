@@ -14,29 +14,23 @@
         </v-row>
         <v-row justify="center">
           <v-col cols="12" md="6" lg="4">
-            <v-hover>
-              <template v-slot="{ hover }">
-                <v-text-field
-                  v-model="ipSearch"
-                  height="56"
-                  solo
-                  class="search-btn it-font-weight-medium subtitle-1"
-                  label="Search for any IP address or domain"
-                  hide-details
-                  :elevation="hover ? 24 : 0"
-                  :class="{'elevation-24': hover}"
-                >
-                  <template v-slot:label>
-                    <span class="darkGrayColor--text it-font-weight-medium">Search for any IP address or domain</span>
-                  </template>
-                  <template v-slot:append>
-                    <v-btn :disabled="!validIp" color="veryDarkGrayColor" class="btn-append" height="56" @click="fetchIpData(ipSearch)">
-                      <v-img src="/images/icon-arrow.svg" height="12" contain />
-                    </v-btn>
-                  </template>
-                </v-text-field>
+            <v-text-field
+              v-model="ipSearch"
+              solo
+              type
+              class="search-btn it-font-weight-medium subtitle-1"
+              label="Search for any IP address or domain"
+              hide-details
+            >
+              <template v-slot:label>
+                <span class="darkGrayColor--text it-font-weight-medium">Search for any IP address or domain</span>
               </template>
-            </v-hover>
+              <template v-slot:append>
+                <v-btn :disabled="!validIp" color="veryDarkGrayColor" class="btn-append" height="56" @click="fetchIpData(ipSearch)">
+                  <v-img src="/images/icon-arrow.svg" height="12" contain />
+                </v-btn>
+              </template>
+            </v-text-field>
           </v-col>
         </v-row>
       </v-col>
@@ -92,7 +86,7 @@
     </v-row>
     <div id="map-wrap" :style="`height: ${ $vuetify.breakpoint.mdAndUp ? 'calc(100vh - 268px)' : '600px'}`">
       <client-only>
-        <l-map :zoom="13" :center="[ipData.lat, ipData.lng]" :options="{ zoomControl: false }">
+        <l-map :zoom="13" :center="[ipData.lat, ipData.lng]" :options="{ zoomControl: false, dragging: false }">
           <l-tile-layer url="http://{s}.tile.osm.org/{z}/{x}/{y}.png" />
           <l-marker :lat-lng="[ipData.lat, ipData.lng]" :icon="markerIcon" />
         </l-map>
